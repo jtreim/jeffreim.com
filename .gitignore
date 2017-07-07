@@ -1,0 +1,15 @@
+
+#Server files
+node_modules/
+npm.cmd
+npm
+nodevars.bat
+node.exe
+*.man
+
+#Examples
+scrollerExamples/
+jadeExamples/
+
+#Already in other repo
+gameserver/
