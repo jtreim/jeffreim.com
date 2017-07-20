@@ -7,8 +7,6 @@ html{
 
 #gameCanvas{
 	position:fixed;
-	height:100%;
-	width:100%;
 	background-color:#000;
 }
 
@@ -19,15 +17,16 @@ header{
 	padding-right: 1rem;
 	margin:2rem;
 	margin-left: 0rem;
-	color: #777;
+	color: #FFF;
 	display: inline-block;
 	position: relative;
+	background: rgba(70, 70, 70, .3);
 }
 
 #navMenu{
 	width:25rem;
 	margin-top: 60rem;
-	color:#777;
+	color:#FFF;
 }
 
 h1{
@@ -35,27 +34,37 @@ h1{
 	position: relative;
 	z-index: 1;
 	text-align: center;
+	background: rgba(90, 90, 90, .3);
 }
 
 ul{
 	position: relative;
+	cursor:pointer;
 }
 
 li{
-	color:#777;
+	background: rgba(90, 90, 90, .3);
+	color:#FFF;
 	text-indent: .5rem;
 	font-size: 1.5rem;
 	margin-top: .1rem;
 	padding:.5rem;
-	-webkit-transition: .2s;
+	cursor:pointer;
 	transition: .2s;
+	-webkit-transition: .2s;
 }
 
-.selection{ background: rgba(128, 128, 128, .5); }
+.selection{ 
+	background: rgba(60, 60, 60, .5);
+	transition: .5s;
+	-webkit-transition: .5s;
+}
+.selection:hover{
+	background: rgba(60, 60, 60, .5);
+}
 
 li:hover{
-	background: rgba(128, 128, 128, .5);
-	-webkit-transition: .2s;
+	background: rgba(120, 120, 120, .3);
 	transition: .2s;
-	cursor: pointer;
+	-webkit-transition: .2s;
 }
