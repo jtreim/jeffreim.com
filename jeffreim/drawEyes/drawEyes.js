@@ -8,6 +8,7 @@ function getRandomInt(min, max){
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max-min+1)) + min;
 }
+
 class Line{
 	constructor(x_multiplier, y_multiplier, name){
 		this.x_multiplier = x_multiplier;

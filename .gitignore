@@ -1,11 +1,9 @@
-
 #Server files
-node_modules/
-npm.cmd
-npm
-nodevars.bat
-node.exe
 *.man
+nodevars.bat
+npm
+npm.cmd
+node.exe
 
 #Examples
 scrollerExamples/
