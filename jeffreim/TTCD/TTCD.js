@@ -8,3 +8,7 @@ function TTCDsetup(){
 
 	TTCDstage.visible = false;
 }
+
+function TTCDanimate(){}
+
+function TTCDresize(){}

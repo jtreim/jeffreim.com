@@ -38,9 +38,17 @@ $(document).ready(function(){
 		}
 	});
 	window.addEventListener("resize", function(event){
+		var oldWidth = renderer.width;
+		var oldHeight = renderer.height;
 		renderer.view.autoResize = true;
 		renderer.resize(window.innerWidth, window.innerHeight);
-	})
+		if(typeof DEstage !== 'undefined'){
+			DEresize(renderer.width, renderer.height, oldWidth, oldHeight);
+		}
+		if(typeof RPGLstage !== 'undefined'){
+			RPGLresize();
+		}
+	});
 	loadGames();
 	display();
 });
@@ -64,19 +72,20 @@ function setup(){
 	TTCDsetup();
 	DEsetup();
 
-	
 	stage.addChild(RPGLstage);
 	stage.addChild(TTCDstage);
 	stage.addChild(DEstage);
-	DEstage.visible = true;
+	RPGLstage.visible = true;
 	display();
 }
 function display(){	
 	renderer.render(stage);
 	if(typeof DEstage !== 'undefined' && DEstage.visible){
 		DEanimate();
-		DEanimate();
-		DEanimate();
+	}else if(typeof RPGLstage !== 'undefined' && RPGLstage.visible){
+		RPGLanimate();
+	}else if(typeof TTCDstage !== 'undefined' && TTCDstage.visible){
+		TTCDanimate();
 	}
 	requestAnimationFrame(display);
 }
