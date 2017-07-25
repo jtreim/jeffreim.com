@@ -1,7 +1,6 @@
 var userPath;
 var drawnPaths = [];
-var redrawnPaths = [];
-var draw = true;
+var animate = true;
 var color = "#333333";
 var stroke = 3;
 var canvas;
@@ -23,7 +22,7 @@ window.onload = function(){
 			strokeColor: color,
 			strokeWidth:stroke
 		});
-		draw = false;
+		animate = false;
 	}
 	tool.onMouseDrag = function(event){
 		userPath.add(event.point);
@@ -31,7 +30,7 @@ window.onload = function(){
 	tool.onMouseUp = function(event){
 		userPath.simplify(10);
 		drawnPaths.push(userPath);
-		draw = true;
+		animate = true;
 		if(color == "#333333"){
 			color = "#FFFFFF";
 			stroke = 10;
@@ -53,7 +52,7 @@ window.onload = function(){
 	}
 
 	view.onFrame = function(event){
-		if(draw && drawnPaths.length > 0){
+		if(animate && drawnPaths.length > 0){
 			redraw();
 		}
 	}

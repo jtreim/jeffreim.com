@@ -1,13 +1,10 @@
 #Server files
 *.man
-nodevars.bat
-npm
-npm.cmd
-node.exe
+npx
+npx.cmd
+package-lock.json
+node_modules/
 
 #Examples
 scrollerExamples/
 jadeExamples/
-
-#Already in other repo
-gameserver/
