@@ -5,6 +5,13 @@ npx.cmd
 package-lock.json
 node_modules/
 
+#Website files
+css/
+fonts/
+*.html
+*.css
+
+
 #Examples
 scrollerExamples/
 jadeExamples/
