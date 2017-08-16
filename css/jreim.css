@@ -25,7 +25,8 @@ header{
 
 #navMenu{
 	width:25rem;
-	margin-top: 60rem;
+	position:absolute;
+	bottom:2rem;
 	color:#FFF;
 }
 
