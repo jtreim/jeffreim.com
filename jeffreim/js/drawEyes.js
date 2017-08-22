@@ -8,402 +8,393 @@ function getRandomInt(min, max){
 	return Math.floor(Math.random() * (max-min+1)) + min;
 }
 
-class Line{
-	constructor(x, y, _x, _y name){
-		this.pos={
+function getDist(x, y, _x, _y){
+	var dx = _x - x;
+	var dy = _y - y;
+	return Math.sqrt((Math.pow(dx,2) + Math.pow(dy,2)));
+}
+
+function getEraseBounds(){
+	var x = window.innerWidth;
+	var _x = 0;
+	var y = window.innerHeight;
+	var _y = 0;
+	for(var i = 0; i < drawnEyes.length; i++){
+		for(var j = 0; j < drawnEyes[i].length; j++){
+			var b = drawnEyes[i][j].getBoundaries();
+			if(b.x < x){
+				x = b.x;
+			}
+			if(b._x > _x){
+				_x = b._x;
+			}
+			if(b.y < y){
+				y = b.y;
+			}
+			if(b._y > _y){
+				_y = b._y;
+			}
+		}
+	}
+	var w = _x - x;
+	var h = _y - y;
+	return {x:x, y:y, _x:_x, _y:_y, w:w, h:h};
+}
+
+class PointNamePair{
+	constructor(x, y, name){
+		this.point = {
 			x: x,
-			y: y,
-			_x: x,
-			_y: y
+			y: y
 		};
 		this.name = name;
 	}
-	equals(l){
-		if(!(l instanceof Line)){ return false; }
-		if(l.pos.x == this.pos.x &&
-			l.pos.y == this.pos.y &&
-			l.pos._x == this.pos._x &&
-			l.pos._y == this.pos._y &&
-			l.name == this.name){ return true; }
-		else{
-			return false;
-		}
+	equals(pnp){
+		return (
+			pnp instanceof PointNamePair &&
+			this.point.x == pnp.point.x &&
+			this.point.y == pnp.point.y &&
+			this.name == pnp.name);
 	}
 }
 
 class Eye{
-	constructor(sx, sy, w, h, side){
-		this.lines = [];
-		if(side == "left"){
-			for(var i = 0; i < EYE_LINE_CNT; i++){
-				var x = LEFT_EYE[i].x + sx;
-				var y = LEFT_EYE[i].y + sy;
-				var _x = LEFT_EYE[i].x + sx + LEFT_EYE[i]._x * w;
-				var _y = LEFT_EYE[i].y + sy + LEFT_EYE[i]._y * h;
-				var name = LEFT_EYE[i].name;
-				this.lines.push(new Line(x, y, _x, _y, name));
-			}
-		}else if(side == "right"){
-			for(var i = 0; i < EYE_LINE_CNT; i++){
-				var x = RIGHT_EYE[i].x + sx;
-				var y = RIGHT_EYE[i].y + sy;
-				var _x = RIGHT_EYE[i].x + sx + RIGHT_EYE[i]._x * w;
-				var _y = RIGHT_EYE[i].y + sy + RIGHT_EYE[i]._y * h;
-				var name = RIGHT_EYE[i].name;
-				this.lines.push(new Line(x, y, _x, _y, name));
-			}
-		}
-	}
-	equals(e){
-		if(!(e instanceof Eye)){ return false; }
-		if(e.lines == null || e.lines.length != this.lines.length){ return false; }
-		for(var i = 0; i < this.lines.length; i++){
-			if(!e.lines[i].equals(this.lines[i])){ return false; }
-		}
-	}
-}
-
-const LEFT_EYE = [new Line(0, 0, .25, -.3, " top lid left"), new Line(.25, -.3, .75, -.5, " top lid center"),
-		new Line(.75, -.5, .9, -.1, " top lid right"), new Line(.9, -.1, 1, 0, " top lid tear duct"),
-		new Line(1, 0, .95, .1, " side tear duct"), new Line(.95, .1, .9, .05, " lower lid tear duct"),
-		new Line(.9, .05, .85, .1, " lower lid right"), new Line(.85, .1, .3, .3, " lower lid center"),
-		new Line(.3, .3, 0, 0, " lower lid left")];
-const RIGHT_EYE = [new Line(0, 0, -.25, -.3, " top lid right"), new Line(-.25, -.3, -.75, -.5, " top lid center"),
-		new Line(-.75, -.5, -.9, -.1, " top lid left"), new Line(-.9, -.1, -1, 0, " top lid tear duct"),
-		new Line(-1, 0, -.95, .1, " side tear duct"), new Line(-.95, .1, -.9, .05, " lower lid tear duct"),
-		new Line(-.9, .05, -.85, .1, " lower lid left"), new Line(-.85, .1, -.3, .3, " lower lid center"),
-		new Line(-.3, .3, 0, 0, " lower lid right")];
-
-var width;
-var height;
-
-const PENCIL_FILL = 0x444444;
-const ERASER_FILL = 0xFFFFFF;
-const PENCIL_SPD = 5;
-const ERASER_W = 30;
-
-var drawnEyes = [];
-var eraserLines = [];
-
-const MAX_LAYERS = 3;
-const EYE_LINE_CNT = LEFT_EYE.length;
-
-class Artist{
-	constructor(){
-		this.stroke = {
-			fill: PENCIL_FILL,
-			spd: PENCIL_SPD
-		};
-
-		this.working = false;
-
-		this.current == null;
-		this.finished = [];
-
-		var w = getRandomFloat(width*.3, width*.5);
-		var h = getRandomFloat(height*.3, height*.4);
-		this.eyeline = {
-			w: w,
-			h: h
-		};
-		
-		w /= (getRandomInt(2,6));
-		var m = 1/(getRandomInt(2,6));
-		m = Math.abs(2 - m);
-		h = this.eyeline.w / m;
-		this.eye = {
-			w: w,
-			h: h
-		};
-
-		var x = width - this.eyeline.w;
-		x = x/2;
-		this.pencil = {
+	constructor(x, y, w, h, side){
+		this.pos = {
 			x: x,
-			y: this.eyeline.h
+			y: y
 		};
-	}
-
-	drawLine(line){
-		if(this.current == null){
-			this.pencil.x = line.x;
-			this.pencil.y = line.y;
-			this.current = line;
-		}
-
-		var dx = line._x - this.pencil.x;
-		var dy = line._y - this.pencil.y;
-		var diff = Math.pow(dx,2) + Math.pow(dy,2);
-		diff = Math.sqrt(diff);
-		
-		if(diff <= PENCIL_SPD){
-			this.pencil.x = line._x;
-			this.pencil.y = line._y;
-			this.finished.push(line);
-			this.current = null;
-		}else{
-			var m = diff / (this.stroke.spd);
-			this.pencil.x += dx/m;
-			this.pencil.y += dy/m;
-		}
-	}
-
-	drawEyes(){
-		if(this.current == null && this.finished.length == 2 * EYE_LINE_CNT){
-		
-			this.working = false;
-
-			var r = new Eye(this.pencil.x, this.pencil.y, this.eye.w, this.eye.h, "right");
-			drawnEyes.push(r);
-
-			this.finished = [];
-
-			this.eyeline.w = getRandomFloat(width*.3, width*.5);
-			this.eyeline.h = getRandomFloat(height*.3, height*.4);
-
-			this.eye.w = this.eyeline.w/(getRandomInt(2,6));
-			var m = 1/(getRandomInt(2,6));
-			m = Math.abs(2 - m);
-			this.eye.h = this.eye.w / m;
-
-			var x = width - this.eyeline.w;
-			x = x/2;
-			this.pencil.x = x;
-			this.pencil.y = this.eyeline.h;
-		}else if(this.finished.length > EYE_LINE_CNT && this.finished.length < 2 * EYE_LINE_CNT){
-			this.drawRightEye();
-		}else if(this.current == null && this.finished.length == EYE_LINE_CNT){
-			var num = getRandomInt(1, 5);
-
-			switch(num){
-				case 1:
-					this.eyeline.h += height*getRandomFloat(-.01,.03);
-					break;
-				case 2:
-					this.eyeline.h += width*getRandomFloat(-.03,.03);
-					break;
-				case 3:
-					this.eyeline.h += height*getRandomFloat(-.01,.03);
-					this.eyeline.w += width*getRandomFloat(-.04,.04);
-					break;
-				default:
-					break;
-			}
-			this.eye.w = this.eyeline.w/(getRandomInt(2,6));
-			var m = 1/getRandomFloat(2,6);
-			m = Math.abs(2-m);
-			this.eye.h = this.eye.w/m;
-			this.pencil.x = width - (width - this.eyeline.w)/2;
-			this.pencil.y = this.eyeline.h;
-			this.drawRightEye();
-		}else{
-			var x = width - this.eyeline.w;
-			x = x/2;
-			this.drawLeftEye();
-		}
-	}
-
-	drawLeftEye(){
-		var line;
-    	if(this.current == null && this.finished.length > 0){
-    		var _x = (width - this.eyeline.w)/2;
-    		var _y = this.eyeline.h;
-    		var name;
-    		var last = this.finished[this.finished.length - 1];
-    		for(var i = 0; i < EYE_LINE_CNT; i++){
-    			if(last.name == LEFT_EYE[i].name){
-    				_x += this.eye.w*LEFT_EYE[i]._x;
-    				_y += this.eye.h*LEFT_EYE[i]._y;
-    				name = LEFT_EYE[i].name;
-    				break;
-    			}
-    		}
-    		line = new Line(last._x, last._y, x, y, name);
-    	}else if(current != null){
-    		line = current;
-    	}else{
-    		var _x = (width - this.eyeline.w)/2 + this.eye.w*LEFT_EYE[0]._x;
-    		var _y = this.eyeline.h + this.eye.h*LEFT_EYE[0]._y;
-    		var name = LEFT_EYE[0].name;
-    		line = new Line(this.pencil.x, this.pencil.y, _x, _y, name);
-    	}
-    	
-    	this.drawLine(line);
-	}
-
-	drawRightEye(){
-		var line;
-    	if(this.current == null && this.finished.length > EYE_LINE_CNT){
-    		var _x = (width - this.eyeline.w)/2;
-    		var _y = this.eyeline.h;
-    		var name;
-    		var last = this.finished[this.finished.length - 1];
-    		for(var i = 0; i < EYE_LINE_CNT; i++){
-    			if(last.name == RIGHT_EYE[i].name){
-    				_x += this.eye.w*RIGHT_EYE[i]._x;
-    				_y += this.eye.h*RIGHT_EYE[i]._y;
-    				name = RIGHT_EYE[i].name;
-    				break;
-    			}
-    		}
-    		line = new Line(last._x, last._y, x, y, name);
-    	}else if(current != null){
-    		line = current;
-    	}else{
-    		var _x = (width - this.eyeline.w)/2 + this.eye.w*RIGHT_EYE[0]._x;
-    		var _y = this.eyeline.h + this.eye.h*RIGHT_EYE[0]._y;
-    		var name = RIGHT_EYE[0].name;
-    		line = new Line(this.pencil.x, this.pencil.y, _x, _y, name);
-    	}
-    	this.drawLine(line);
-	}
-
-	resize(){
-		this.eyeline.w = getRandomFloat(width*.3, width*.5);
-		this.eyeline.h = getRandomFloat(height*.3, height*.4);
-
-		this.eye.w = this.eyeline.w/(getRandomInt(2,6));
-		var m = 1/(getRandomInt(2,6));
-		m = Math.abs(2 - m);
-		this.eye.h = this.eye.w / m;
-
-		var x = width - this.eyeline.w;
-		x = x/2;
-		this.pencil.x = x;
-		this.pencil.y = this.eyeline.h;
-	}
-}
-class Eraser{
-	constructor(){
-		this.stroke = {
-			w: ERASER_W,
-			fill: ERASER_FILL
-		};
-
-		var w = getRandomFloat(width*.5, width*.8);
-		var h = getRandomFloat(height*.1, height*.5);
 		this.size = {
 			w: w,
 			h: h
 		};
-		this.count = 0;
+		this.points = [];
+		var src;
+		if(side == RIGHT){
+			src = RIGHT_EYE;
+		}else{
+			src = LEFT_EYE;
+		}
 
-		var x = (width - this.size.w)/2;
-		var y = (height - this.size.h)/2;
-		this.pos = {
-			x: x,
-			y: y
-		}; 
-    	this.working = false;
+		var pnp = src[0];
+		var x = pnp.point.x * this.size.w + this.pos.x;
+		var y = pnp.point.y * this.size.h + this.pos.y;
+		this.points.push(new PointNamePair(x, y, pnp.name)); 
+		
+		for(var i = 1; i < src.length - 1; i++){
+			pnp = src[i];
+			x = (pnp.point.x + getRandomFloat(-.03, .03)) * this.size.w + this.pos.x;
+			y = (pnp.point.y + getRandomFloat(-.03, .03)) * this.size.h + this.pos.y;
+			this.points.push(new PointNamePair(x, y, pnp.name));
+		}
+
+		pnp = src[0];
+		x = pnp.point.x * this.size.w + this.pos.x;
+		y = pnp.point.y * this.size.h + this.pos.y;
+		this.points.push(new PointNamePair(x, y, pnp.name)); 
+
+		this.pointItr = 0;
+		this.side = side;
+		this.path = new paper.Path();
 	}
-
-	eraseAll(count){
-		if(this.count == count) {
-      		this.size.w = getRandomFloat(width*.5, width*.8);
-      		this.size.h = getRandomFloat(height*.1, height*.5);
-      		this.count = 0;
-      		this.pos.x = (width - this.size.w)/2;
-      		this.pos.y = (height - this.size.h)/2;
-      		return false;
-    	}
-    	var ratio = this.count/count;
-       	var x;
-    	var y = (height - this.size.h)/2 + this.size.h*ratio - 105;
-    	if(this.count%2 == 0)	{
-      		x = width - (width - this.erase_width)/2;
-    	} else {
-      		x = (this.WIDTH - this.erase_width)/2;
-    	}
-    	x -= 15;
-    	this.eraseLine(x, y);
-    	return true;
+	isLeft(){
+		return(this.side == LEFT);
 	}
-
-	eraseLine(x_end, y_end){
-    	var x_dist = x_end - this.eraser_x;
-    	var y_dist = y_end - this.eraser_y;
-    	var difference = Math.pow(x_dist, 2) + Math.pow(y_dist, 2);                             
-    	difference = Math.sqrt(difference);
-    	if(difference <= this.stroke_width/2){										// Checks if line is done.
-    		this.erase_count++;
-    	} else {
-      		var slope_fraction = difference / (this.stroke_width*.75);
-      		this.eraser_x += x_dist/slope_fraction;
-      		this.eraser_y += y_dist/slope_fraction;
-    	}
+	isRight(){
+		return(this.side == RIGHT);
 	}
-
-	changeCanvas(){
-		this.WIDTH = window.innerWidth;
-		this.HEIGHT = window.innerHeight;
-
-		this.erase_width = getRandomFloat(this.WIDTH*.5, this.WIDTH*.8);
-    	this.erase_height = getRandomFloat(this.HEIGHT*.1, this.HEIGHT*.5);
-    	this.erase_count = 0;
-    	this.eraser_x = (this.WIDTH - this.erase_width)/2;
-    	this.eraser_y = (this.HEIGHT - this.erase_height)/2 - 105;
+	getPoint(){
+		if(this.pointItr >= this.points.length || this.pointItr < 0){
+			return null;
+		}else{
+			return this.points[this.pointItr].point;
+		}
+	}
+	getPrevPoint(){
+		if(this.pointItr == 0 || this.pointItr - 1 >= this.points.length){
+			return null;
+		}else{
+			return this.points[this.pointItr - 1].point;
+		}
+	}
+	getBoundaries(){
+		var x;
+		var _x;
+		var y;
+		var _y;
+		if(this.side == LEFT){
+			x = this.pos.x - ERASE_BUFFER;
+			_x = this.pos.x + this.size.w + ERASE_BUFFER;
+			y = this.pos.y + LEFT_EYE[2].point.y * this.size.h - ERASE_BUFFER;
+			_y = this.pos.y + LEFT_EYE[8].point.y * this.size.h + ERASE_BUFFER;
+		}else{
+			x = this.pos.x - this.size.w - ERASE_BUFFER;
+			_x = this.pos.x + ERASE_BUFFER;
+			y = this.pos.y + RIGHT_EYE[2].point.y * this.size.h - ERASE_BUFFER;
+			_y = this.pos.y + RIGHT_EYE[8].point.y * this.size.h + ERASE_BUFFER;
+		}
+		return { x:x, y:y, _x:_x, _y:_y };
 	}
 }
+
+class Eraser{
+	constructor(){
+		this.bounds = {
+			x:0,
+			y:0,
+			_x:0,
+			_y:0,
+			w:0,
+			h:0
+		};
+		this.x = 0;
+		this.y = 0;
+		this.cnt = 0;
+		this.working = false;
+		this.path = null;
+	}
+	erase(cnt){
+		// RETURN: false if done erasing.
+		// Starting to erase
+		if(!this.path){
+			this.path = new paper.Path();
+			this.path.strokeColor = WHITE;
+			this.path.strokeColor.alpha = ERASER_ALPHA;
+			this.path.strokeWidth = ERASER_STROKE;
+
+			this.x = this.bounds.x;
+
+			this.y = this.bounds.y;
+			this.path.add(new paper.Point(this.x, this.y));
+			this.cnt = 0;
+
+		// Reached end of erasing
+		}else if(this.cnt == cnt){
+			eraserPaths.push(this.path);
+			this.path = null;
+			return false;
+		}
+		
+		// Otherwise, keep erasing on current line
+		this.eraseLine(cnt);
+		return true;
+	}
+
+	eraseLine(cnt){
+		var x;
+		var _x;
+		var _y = this.bounds.y + this.bounds.h/cnt * (1 + this.cnt);
+
+		if(this.cnt % 2 == 0){
+			x = this.bounds.x;
+			_x = this.bounds._x;
+		}else{
+			x = this.bounds._x;
+			_x = this.bounds.x;
+		}
+
+		var diff = getDist(this.x, this.y, _x, _y);
+		if(diff <= ERASE_SPD){
+			this.path.add(new paper.Point(_x, _y));
+			this.x = _x;
+			this.y = _y;
+			this.cnt++;
+		}else{
+			var dx = _x - x;
+			var dy = this.bounds.h/cnt;
+
+			this.x += dx/ERASE_SPD;
+			this.y += dy/ERASE_SPD;
+
+			this.path.add(new paper.Point(this.x, this.y));
+		}
+	}
+}
+
+class Artist{
+	constructor(){
+		this.pencil = {
+			x: 0,
+			y: 0
+		};
+		this.working = false;
+		this.eye = null;
+	}
+	draw(){
+		// RETURN: true if still drawing, false if done drawing left & right eyes
+		// Starting new left eye
+		if(!this.eye){
+			var w = getRandomFloat(MIN_EYELINE_W,MAX_EYELINE_W) * window.innerWidth;
+			var h = getRandomFloat(MIN_EYE_H,MAX_EYE_H) * window.innerHeight;
+			this.pencil.x = (window.innerWidth - w)/2;
+			this.pencil.y = getRandomFloat(MIN_EYELINE_H,MAX_EYELINE_H) * window.innerHeight;
+
+			this.eye = new Eye(this.pencil.x, this.pencil.y, 
+				w/(getRandomInt(MIN_EYE_SPACING,MAX_EYE_SPACING)), h, LEFT);
+			this.eye.path.strokeColor = PENCIL;
+			this.eye.path.strokeWidth = ARTIST_STROKE;
+
+		// Finished left eye, starting right
+		}else if(this.eye.isLeft() && 
+			this.eye.pointItr == this.eye.points.length){
+			currentEyes.push(this.eye);
+
+			var w = getRandomFloat(MIN_EYELINE_W,MAX_EYELINE_W) * window.innerWidth;
+			var h = getRandomFloat(MIN_EYE_H,MAX_EYE_H) * window.innerHeight;
+			this.pencil.x = window.innerWidth - (window.innerWidth - w)/2;
+			this.pencil.y = getRandomFloat(MIN_EYELINE_H,MAX_EYELINE_H) * window.innerHeight;
+
+			this.eye = new Eye(this.pencil.x, this.pencil.y,
+				w/(getRandomInt(MIN_EYE_SPACING,MAX_EYE_SPACING)), h, RIGHT);
+			this.eye.path.strokeColor = PENCIL;
+			this.eye.path.strokeWidth = ARTIST_STROKE;
+
+		// Finished both eyes
+		}else if(this.eye.isRight() && 
+			this.eye.pointItr == this.eye.points.length){
+			currentEyes.push(this.eye);
+			this.eye = null;
+			return false;
+		}
+
+		// Otherwise, continue drawing current eye
+		this.drawEye();
+		return true;
+	}
+
+	drawEye(){
+		var p = this.eye.getPoint();
+		var diff = getDist(this.pencil.x, this.pencil.y, p.x, p.y);
+		
+		// Finished drawing up to current point
+		if(diff <= DRAW_SPD){
+			this.eye.path.add(p);
+			this.pencil.x = p.x;
+			this.pencil.y = p.y;
+			this.eye.pointItr++;
+			this.eye.path.simplify(1)
+		}else{
+			var dx = p.x - this.eye.getPrevPoint().x;
+			var dy = p.y - this.eye.getPrevPoint().y;
+
+			dx /= DRAW_SPD;
+			dy /= DRAW_SPD;
+
+			this.pencil.x += dx;
+			this.pencil.y += dy;
+
+			this.eye.path.add(new paper.Point(this.pencil.x, this.pencil.y));
+		}
+	}
+}
+
+var ratio = {
+	x: 1,
+	y: 1
+};
+var oldWidth;
+var oldHeight;
+var resized = false;
 
 var artist = new Artist();
 var eraser = new Eraser();
-var graphics = new PIXI.Graphics();
-var stage = new PIXI.Container();
-var resized = false;
-var erase_cnt = getRandomInt(8,15);
+var eraserLineCnt = 0;
 
-function setup(){
+const MIN_ERASE_LINES = 8;
+const MAX_ERASE_LINES = 12;
+
+const WHITE = "#FFFFFF";
+const ERASER_ALPHA = .8;
+const PENCIL = "#333333";
+
+const LEFT_EYE = [new PointNamePair(0,0, " start"),
+		new PointNamePair(.25, -.3, " top lid left"), new PointNamePair(.75, -.5, " top lid center"),
+		new PointNamePair(.9, -.1, " top lid right"), new PointNamePair(1, 0, " top lid tear duct"),
+		new PointNamePair(.95, .1, " side tear duct"), new PointNamePair(.9, .05, " lower lid tear duct"),
+		new PointNamePair(.85, .1, " lower lid right"), new PointNamePair(.3, .3, " lower lid center"),
+		new PointNamePair(0, 0, " lower lid left")];
+const RIGHT_EYE = [new PointNamePair(0,0, " start"),
+		new PointNamePair(-.25, -.3, " top lid right"), new PointNamePair(-.75, -.5, " top lid center"),
+		new PointNamePair(-.9, -.1, " top lid left"), new PointNamePair(-1, 0, " top lid tear duct"),
+		new PointNamePair(-.95, .1, " side tear duct"), new PointNamePair(-.9, .05, " lower lid tear duct"),
+		new PointNamePair(-.85, .1, " lower lid left"), new PointNamePair(-.3, .3, " lower lid center"),
+		new PointNamePair(0, 0, " lower lid right")];
+const LEFT = "left";
+const RIGHT = "right";
+const MIN_EYE_H = .05;
+const MAX_EYE_H = .4;
+const MIN_EYELINE_W = .4;
+const MAX_EYELINE_W = .8;
+const MIN_EYELINE_H = .4;
+const MAX_EYELINE_H = .6;
+const MIN_EYE_SPACING = 2;
+const MAX_EYE_SPACING = 4;
+const ERASE_BUFFER = 5;
+
+var userPath;
+var drawnEyes = [];
+var eraserPaths = [];
+var currentEyes = [];
+
+const DRAW_SPD = 8;
+const ERASE_SPD = 5;
+const ARTIST_STROKE = 5;
+const ERASER_STROKE = 50;
+
+const MAX_LAYERS = 3;
+
+paper.install(window);
+
+window.onload = function(){
 	canvas = document.getElementById("gameCanvas");
-	rendererOptions = { view: canvas, antialias: false, transparent: false, resolution:1 };
-	autoDetectRenderer = PIXI.autoDetectRenderer;
-	renderer = autoDetectRenderer(window.innerWidth, window.innerHeight, rendererOptions);
-	renderer.backgroundColor = 0xFFFFFF;
-	stage.addChild(graphics);
-	animate();
-}
+	canvas.style.backgroundColor = WHITE;
+	canvas.style.width = "100%";
+	canvas.style.height = "100%";
 
-function animate(){
-	renderer.render(stage);
-	for(var i = 0; i < 3; i++){
+	oldWidth = window.innerWidth;
+	oldHeight = window.innerHeight;
+
+	paper.setup(canvas);
+
+	view.onFrame = function(event){
 		if(!artist.working && !eraser.working && resized){
-			resize();
-		}else if(!artist.working && !eraser.working){
-			artist.working = true;
-			artist.drawEyes();
-		}else if(artist.working && !eraser.working && !artist.drawEyes()){
-			eraser.working = true;
-			artist.working = false;
-			erase_cnt = getRandomInt(8,15);
-			eraser.eraseAll(erase_cnt);
-		}else if(!artist.working && eraser.working && !eraser.eraseAll(erase_cnt)){
-			eraser.working = false;
+			resizeCanvas();
 		}
-		if(artist.working){
-			graphics.beginFill(artist.fill, 1);
-			graphics.drawEllipse(artist.pencil_x, artist.pencil_y, artist.stroke_width, artist.stroke_width);
-			graphics.endFill();
-		}else if(eraser.working){
-			graphics.beginFill(0xFFFFFF, eraser.opacity);
-			graphics.drawEllipse(eraser.eraser_x, eraser.eraser_y, eraser.stroke_width, eraser.stroke_width);
-			graphics.endFill();
+		if(!artist.working && !eraser.working){
+			artist.working = true;
+			artist.draw();
+		}else if(artist.working && !artist.draw()){
+			drawnEyes.push(currentEyes);
+			currentEyes = [];
+			artist.working = false;
+			eraser.working = true;
+			eraserLineCnt = getRandomInt(MIN_ERASE_LINES, MAX_ERASE_LINES);
+			eraser.bounds = getEraseBounds();
+		}else if(eraser.working && !eraser.erase(eraserLineCnt)){
+			eraser.working = false;
+			if(drawnEyes.length == MAX_LAYERS){
+				drawnEyes[0][0].path.remove();
+				drawnEyes[0][1].path.remove();
+				drawnEyes.splice(0,1);
+			}
+			if(eraserPaths.length == MAX_LAYERS){
+				eraserPaths[0].remove();
+				eraserPaths.splice(0,1);
+			}
 		}
 	}
-	requestAnimationFrame(animate);
 }
 
 $(document).ready(function(){
 	window.addEventListener("resize", function(event){
-		renderer.view.autoResize = true;
-		renderer.resize(window.innerWidth, window.innerHeight);
 		resized = true;
 	});
-	setup();
 });
 
-function resize(){
+function resizeCanvas(){
+	ratio.x = window.innerWidth/oldWidth;
+	ratio.y = window.innerHeight/oldHeight;
+	oldWidth = window.innerWidth;
+	oldHeight = window.innerHeight;
 	resized = false;
-	width = window.innerWidth;
-	height = window.innerHeight;
-	artist.resize();
-	eraser.resize();
 }
