@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script
+		src="https://code.jquery.com/jquery-3.2.1.min.js"
+		integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+	<script type="text/javascript" src="../js/REST-interface.js"></script>
+	<link rel="stylesheet" type="text/css" href="../css/cssreset.css">
+	<link rel="stylesheet" type="text/css" href="../css/REST-interface.css">
+	<title>Find Spies</title>
+</head>
+<body>
+	<header>Finding Spies</header>
+	<div id="page">
+		<form id="start-form">
+			<p>Spies have snuck into your community. As the governing power, you need to find and eliminate them all before they do something bad! Be careful not to be too intrusive too quickly though; you don't want people to become paranoid.</p>
+			<ul>Actions
+				<li>Remove target: Eliminates target. Be careful: if you remove an innocent person, the community will become much more paranoid.</li>
+				<li>Hack: Reveals the target's internet information.</li>
+				<li>Survey: Reveals the target's home location.</li>
+				<li>Mobile: Reveals the target's phone information.</li>
+				<li>Search Records: Reveals the target's nationality and date of birth.</li>
+			</ul>
+			<div class="range-slider" id="population-input">
+				<label for="population-scroller">Population</label>
+				<input type="range" min="5" max="50" value="25" step="1" name="population-scroller" class="range-slider__range"></input>
+				<span class="range-slider__value">25</span>
+			</div>
+			<div class="range-slider" id="timer-input">
+				<label for="timer-scroller">Time</label>
+				<input type="range" min="30" max="120" value="75" step="5" name="timer-scroller" class="range-slider__range"></input>
+				<span class="range-slider__value">75</span>
+			</div>
+			<button id="start-button">Start</button>
+		</form>
+		<canvas id="game-canvas"></canvas>
+	</div>
+</body>
+</html>
