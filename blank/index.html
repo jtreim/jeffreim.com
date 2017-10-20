@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale = 1.0">
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.3.2/angular-ui-router.js"></script>
+	<script type="text/javascript" src='js/paper-full.js'></script>
+	<script type="text/javascript" src='js/broken-paper.js'></script>
+	<script type="text/javascript" src="js/broken.js"></script>
+	<link rel="stylesheet" type="text/css" href="../css/cssreset.css">
+	<link rel="stylesheet" type="text/css" href="../css/broken.css">
+	<title>404 ERROR::!@~symbol sombrero</title>
+</head>
+<body onload="BrokenModule.init()" ng-app="Broken">
+	<canvas id="game-canvas" resize></canvas>
+	<ui-view></ui-view>
+	<script type="text/ng-template" id="/start.html">
+		<p id="message">{{text}}</p>
+	</script>
+	<script type="text/ng-template" id="/blob.html">
+		<div class='blob-facts'>
+			<p ng-if='blob.facts.color'>Favorite Color: {{blob.facts.color}}</p>
+			<p ng-if='blob.facts.iq'>IQ: {{blob.facts.iq}}</p>
+			<p ng-if='blob.facts.fear'>Fear: {{blob.facts.fear}}</p>
+			<p ng-if='blob.facts.jump'>Jump height: {{blob.facts.jump}}</p>
+			<p ng-if='blob.facts.fat'>Body Fat: {{blob.facts.fat}}%</p>
+			<p ng-if='blob.facts.emotion'>Feeling: {{blob.facts.emotion}}</p>
+		</div>
+		<div ng-click="homeLink()" id="home-link">Main</a>
+	</script>
+</body>
+</html>
