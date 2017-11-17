@@ -1,0 +1,10 @@
+extends layout
+
+block content
+ header Add a new Game
+ form#add-game-form
+  input#add-game-name(type="text" placeholder="Game name")
+  input#add-game-picurl(type='text' placeholder='Pic URL')
+  input#add-game-url(type='text' placeholder='Game URL')
+  textarea#add-game-description(type='text' placeholder='Description')
+ button#add-game-btn(disabled) Submit

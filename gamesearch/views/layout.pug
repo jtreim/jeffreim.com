@@ -1,0 +1,15 @@
+doctype html
+html
+ head
+  title= title
+  meta(name='viewport' content='width=device-width, initial-scale=1.0')
+  script(src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous")
+  script(src='/javascripts/client.js')
+  link(rel='stylesheet', href='/stylesheets/cssreset.css')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+ body
+  #nav
+   a(href='/') Home
+   a(href='/add-game') Add a game
+   a(href='/search') Search
+  block content

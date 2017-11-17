@@ -1,0 +1,14 @@
+extends layout
+
+block content
+ header= title
+ #game-list
+  each g in games
+   .game-info
+    a(href=g.url)
+     if (g.picUrl && g.picUrl != "")
+      img(src=g.picUrl)
+     else
+      img(src="/images/default-game.png")
+    a(href=g.url)= g.title
+    p= g.description
